@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: loop_shift_app
+    restart: unless-stopped
+    privileged: true  # Required for hardware access (I2C/GPIO)
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1" # Map I2C device
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:6eEZzlFtdjI85h1uaBMBu5BXXkgUMWr8umEvpz0FAhYjOlnrnkZuz33tW6Eoftok@93.177.102.172:5432/postgres
+    volumes:
+      - .:/app
+

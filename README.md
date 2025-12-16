@@ -1,52 +1,41 @@
 # Card Access Logging System
 
-A Python application to log entry and exit times based on card IDs.
-This version uses **PostgreSQL** and provides both a **FastAPI Service** and a **CLI Tool**.
+A Python application to log entry and exit times based on card IDs using **PostgreSQL** and an **PN532 NFC/RFID Reader**.
 
 ## Features
-- **PostgreSQL Database**: Persistent storage for users and logs.
-- **FastAPI Service**: REST API for managing users and scans.
-- **CLI Tool**: Command-line interface for local testing.
-- **Automatic Status Toggle**: Automatically detects 'ENTRY' or 'EXIT'.
+- **Hardware Integration**: Supports PN532 RFID reader via I2C on Raspberry Pi.
+- **Dockerized**: Easy deployment with Docker and Docker Compose.
+- **FastAPI Service**: REST API for remote management.
+- **CLI Tool**: On-device interface for scanning.
 
-## Requirements
+## Hardware Requirements
+- **Raspberry Pi** (3, 4, or Zero W)
+- **PN532 NFC/RFID Module**
+- **Connection**: I2C (SDA to Pin 3, SCL to Pin 5, VCC to 3.3V/5V, GND to GND)
 
-Install dependencies:
+## Installation (Docker)
+
+1.  Clone the repository to your Raspberry Pi.
+2.  Enable I2C on your Pi (`sudo raspi-config` -> Interface Options -> I2C).
+3.  Build and run the container:
+    ```bash
+    docker-compose up --build -d
+    ```
+
+## Usage
+
+### 1. Run the CLI (On Device)
+To use the CLI inside the running container:
 ```bash
-pip install -r requirements.txt
+docker exec -it loop_shift_app python cli.py
 ```
+-   **Scan Card**: Logs Entry/Exit.
+-   **Add Card**: Scans a new card and asks for a name.
+
+### 2. API Access
+The API is available at `http://<raspberry-pi-ip>:8000`.
+-   **Docs**: `/docs`
 
 ## Configuration
-
-The database connection is configured in `database.py`.
-Current default: `postgresql://postgres:6eEZzlFtdjI85h1uaBMBu5BXXkgUMWr8umEvpz0FAhYjOlnrnkZuz33tW6Eoftok@93.177.102.172:5432/postgres`
-
-## Running the API Service
-
-Start the server using `uvicorn`:
-
-```bash
-uvicorn main:app --reload
-```
-
-- **Docs**: Open http://127.0.0.1:8000/docs for the interactive API documentation.
-- **Root**: http://127.0.0.1:8000/
-
-### API Endpoints
-- `POST /scan`: Scan a card `{ "card_id": "..." }`.
-- `POST /users`: Register a user `{ "card_id": "...", "full_name": "..." }`.
-- `GET /history`: View access logs.
-- `GET /users/{card_id}`: Get user details.
-
-## Running the CLI Tool
-
-For local testing/simulation via terminal:
-
-```bash
-python cli.py
-```
-
-## Default User
-The system handles registration. You can create a test user via API or CLI:
-- **ID**: `00x-abc-bcd`
-- **Name**: `Furkan Ulutaş`
+-   **Database**: Set via `DATABASE_URL` in `docker-compose.yml`.
+-   **I2C Device**: Mapped automatically as `/dev/i2c-1`.

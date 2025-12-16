@@ -2,12 +2,17 @@ import sys
 import time
 import os
 
+# Import directly from database.py
+from database import init_db, add_user, get_user, get_last_action, log_access, get_logs
+# Import the RFID reader wrapper
+from rfid_reader import RFIDReader
+
 # Set encoding for Windows console
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding='utf-8')
 
-# Import directly from database.py which now handles the ORM/Postgres logic but returns compatible structures
-from database import init_db, add_user, get_user, get_last_action, log_access, get_logs
+# Initialize reader
+reader = RFIDReader()
 
 def print_separator():
     print("-" * 50)
@@ -18,21 +23,8 @@ def handle_scan(card_id):
     if not user:
         print_separator()
         print(f"Card ID '{card_id}' not recognized.")
-        choice = input("Would you like to register this card? (y/n): ").lower()
-        if choice == 'y':
-            name = input("Enter Full Name: ").strip()
-            if name:
-                add_user(card_id, name)
-                # After registration, proceed to log scan? 
-                # Usually you scan again, but let's auto-log as ENTRY for convenience.
-                print("User registered successfully. Processing scan...")
-                user = get_user(card_id) # Refresh user
-            else:
-                print("Registration cancelled.")
-                return
-        else:
-            print("Scan ignored.")
-            return
+        print("Please use 'Add New Card' option to register.")
+        return
 
     # Determine Entry or Exit
     last_action = get_last_action(card_id)
@@ -66,10 +58,9 @@ def add_new_card_flow():
     print_separator()
     print("ADD NEW CARD")
     print("Please scan the new card now...")
-    print("(Waiting for RFID input...)")
     
-    # Wait for input (RFID scanners usually act as keyboard)
-    card_id = input("Card ID > ").strip()
+    # Use the hardware reader
+    card_id = reader.read_card()
     
     if not card_id:
         print("Error: No card ID received.")
@@ -115,11 +106,10 @@ def main():
         
         if choice == '1':
             print("\nWaiting for card scan (Entry/Exit)...")
-            card_input = input("Scan Card > ").strip()
-            if card_input:
-                handle_scan(card_input)
-            else:
-                print("Invalid input.")
+            # Use hardware reader
+            card_id = reader.read_card()
+            if card_id:
+                handle_scan(card_id)
         elif choice == '2':
             add_new_card_flow()
         elif choice == '3':

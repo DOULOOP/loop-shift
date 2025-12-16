@@ -3,4 +3,7 @@ uvicorn
 sqlalchemy
 psycopg2-binary
 pydantic
-
+adafruit-circuitpython-pn532
+gpiod
+rpi.gpio; platform_machine == "armv7l" or platform_machine == "aarch64"
+Adafruit-Blinka
