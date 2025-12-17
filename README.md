@@ -4,6 +4,7 @@ A Python application to log entry and exit times based on card IDs using **Postg
 
 ## Features
 - **Hardware Integration**: Supports PN532 RFID reader via I2C on Raspberry Pi.
+- **LED Indicator**: Visual feedback for entry/exit events.
 - **Dockerized**: Easy deployment with Docker and Docker Compose.
 - **FastAPI Service**: REST API for remote management.
 - **CLI Tool**: On-device interface for scanning.
@@ -11,7 +12,17 @@ A Python application to log entry and exit times based on card IDs using **Postg
 ## Hardware Requirements
 - **Raspberry Pi** (3, 4, or Zero W)
 - **PN532 NFC/RFID Module**
-- **Connection**: I2C (SDA to Pin 3, SCL to Pin 5, VCC to 3.3V/5V, GND to GND)
+- **LED** (optional, for visual feedback)
+
+### Wiring
+- **PN532 Module**: I2C (SDA to Pin 3, SCL to Pin 5, VCC to 3.3V/5V, GND to GND)
+- **LED**: Connected to GPIO 17 (Pin 11) with appropriate current-limiting resistor (220-330Ω recommended)
+  - LED anode (+) → GPIO 17 (through resistor)
+  - LED cathode (-) → GND
+
+### LED Behavior
+- **Entry (Clock In)**: LED blinks **2 times**
+- **Exit (Clock Out)**: LED blinks **3 times**
 
 ## Installation (Docker)
 

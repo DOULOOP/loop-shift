@@ -8,10 +8,15 @@ services:
     privileged: true  # Required for hardware access (I2C/GPIO)
     devices:
       - "/dev/i2c-1:/dev/i2c-1" # Map I2C device
+      - "/dev/gpiomem:/dev/gpiomem"
+      - "/dev/mem:/dev/mem"
     ports:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:6eEZzlFtdjI85h1uaBMBu5BXXkgUMWr8umEvpz0FAhYjOlnrnkZuz33tW6Eoftok@93.177.102.172:5432/postgres
+      - PYTHONUNBUFFERED=1
     volumes:
       - .:/app
+
+
 

@@ -5,13 +5,22 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 import database as db_module
 from database import get_db, User, AccessLog, init_db
+from led_controller import LEDController
 
 app = FastAPI(title="Card Access System API")
+
+# Initialize LED controller
+led = LEDController(pin=17)
 
 # Initialize DB on startup
 @app.on_event("startup")
 def on_startup():
     init_db()
+
+# Cleanup on shutdown
+@app.on_event("shutdown")
+def on_shutdown():
+    led.cleanup()
 
 # Pydantic Models
 class UserCreate(BaseModel):
@@ -79,6 +88,12 @@ def scan_card(scan: ScanRequest, db: Session = Depends(get_db)):
     db.add(new_log)
     db.commit()
     db.refresh(new_log)
+    
+    # Control LED based on action
+    if new_action == 'ENTRY':
+        led.blink(times=2)  # Blink 2 times for entry
+    else:  # EXIT
+        led.blink(times=3)  # Blink 3 times for exit
     
     # Construct response with user name
     response = LogResponse.from_orm(new_log)

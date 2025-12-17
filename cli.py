@@ -6,13 +6,16 @@ import os
 from database import init_db, add_user, get_user, get_last_action, log_access, get_logs
 # Import the RFID reader wrapper
 from rfid_reader import RFIDReader
+# Import LED controller
+from led_controller import LEDController
 
 # Set encoding for Windows console
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding='utf-8')
 
-# Initialize reader
+# Initialize reader and LED
 reader = RFIDReader()
+led = LEDController(pin=17)
 
 def print_separator():
     print("-" * 50)
@@ -35,6 +38,13 @@ def handle_scan(card_id):
         new_action = 'ENTRY' # Default to ENTRY if no logs or last was EXIT
         
     log_access(card_id, new_action)
+    
+    # Control LED based on action
+    if new_action == 'ENTRY':
+        led.blink(times=2)  # Blink 2 times for entry
+    else:  # EXIT
+        led.blink(times=3)  # Blink 3 times for exit
+    
     print_separator()
     print(f"SUCCESS: {new_action} logged for {user['full_name']} ({card_id})")
     print(f"Time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -125,5 +135,7 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         print("\nExiting...")
+    finally:
+        led.cleanup()
         sys.exit(0)
 
