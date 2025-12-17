@@ -96,6 +96,26 @@ def add_new_card_flow():
     
     input("\nPress Enter to return...")
 
+def continuous_scan_mode():
+    """Continuous scanning mode - automatically listens for all cards"""
+    print_separator()
+    print("CONTINUOUS SCAN MODE")
+    print_separator()
+    print("System is now listening for cards continuously...")
+    print("Press Ctrl+C to return to menu")
+    print_separator()
+    print()
+    
+    try:
+        while True:
+            card_id = reader.read_card(timeout=1)
+            if card_id:
+                handle_scan(card_id)
+                print("\nWaiting for next card...")
+    except KeyboardInterrupt:
+        print("\n\nReturning to menu...")
+        time.sleep(1)
+
 def main():
     init_db()
     
@@ -107,24 +127,27 @@ def main():
         print_separator()
         print("CARD ACCESS SYSTEM")
         print_separator()
-        print("1. Scan Card (Entry/Exit)")
-        print("2. Add New Card")
-        print("3. View Access History")
-        print("4. Exit")
+        print("1. Continuous Scan Mode (Auto)")
+        print("2. Single Scan (Manual)")
+        print("3. Add New Card")
+        print("4. View Access History")
+        print("5. Exit")
         
         choice = input("\nSelect an option: ")
         
         if choice == '1':
+            continuous_scan_mode()
+        elif choice == '2':
             print("\nWaiting for card scan (Entry/Exit)...")
             # Use hardware reader
             card_id = reader.read_card()
             if card_id:
                 handle_scan(card_id)
-        elif choice == '2':
-            add_new_card_flow()
         elif choice == '3':
-            show_history()
+            add_new_card_flow()
         elif choice == '4':
+            show_history()
+        elif choice == '5':
             print("System shutting down...")
             break
         else:

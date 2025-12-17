@@ -35,18 +35,75 @@ A Python application to log entry and exit times based on card IDs using **Postg
 
 ## Usage
 
-### 1. Run the CLI (On Device)
-To use the CLI inside the running container:
+### 1. Continuous Card Listener (Recommended)
+The system includes a dedicated continuous listener service that automatically scans and logs cards 24/7:
+
+**Run as a service (auto-start with Docker):**
+```bash
+docker-compose up -d
+```
+Both the API server and card listener will start automatically. The listener will continuously wait for cards.
+
+**View listener logs:**
+```bash
+docker logs -f loop_shift_listener
+```
+
+**Stop the listener:**
+```bash
+docker-compose stop card_listener
+```
+
+### 2. Interactive CLI (Manual Mode)
+To use the CLI with menu options inside the running container:
 ```bash
 docker exec -it loop_shift_app python cli.py
 ```
--   **Scan Card**: Logs Entry/Exit.
--   **Add Card**: Scans a new card and asks for a name.
+Options:
+-   **Continuous Scan Mode**: Automatically listens for cards (Ctrl+C to return to menu)
+-   **Single Scan**: One-time card scan
+-   **Add Card**: Register a new card
+-   **View History**: See access logs
 
-### 2. API Access
+### 3. Standalone Listener (Alternative)
+Run the continuous listener directly:
+```bash
+docker exec -it loop_shift_app python card_listener.py
+```
+
+### 4. API Access
 The API is available at `http://<raspberry-pi-ip>:8000`.
 -   **Docs**: `/docs`
+-   **Health Check**: `/`
 
 ## Configuration
 -   **Database**: Set via `DATABASE_URL` in `docker-compose.yml`.
 -   **I2C Device**: Mapped automatically as `/dev/i2c-1`.
+-   **LED Pin**: Default is GPIO 17, can be changed in `led_controller.py`.
+
+## Quick Start
+
+1. **Deploy everything:**
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Watch card scans in real-time:**
+   ```bash
+   docker logs -f loop_shift_listener
+   ```
+
+3. **Register a new card (in a separate terminal):**
+   ```bash
+   docker exec -it loop_shift_app python cli.py
+   # Select option 3: "Add New Card"
+   ```
+
+That's it! The system will now continuously listen for cards and automatically log entries/exits with LED feedback.
+
+## System Architecture
+
+- **API Service** (`loop_shift_app`): FastAPI server on port 8000
+- **Card Listener** (`loop_shift_listener`): Background service that continuously scans cards
+- **Database**: PostgreSQL (external)
+- **Hardware**: PN532 RFID reader + LED indicator

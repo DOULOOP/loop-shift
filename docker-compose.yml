@@ -17,6 +17,24 @@ services:
       - PYTHONUNBUFFERED=1
     volumes:
       - .:/app
+  
+  card_listener:
+    build: .
+    container_name: loop_shift_listener
+    restart: unless-stopped
+    privileged: true  # Required for hardware access (I2C/GPIO)
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1" # Map I2C device
+      - "/dev/gpiomem:/dev/gpiomem"
+      - "/dev/mem:/dev/mem"
+    environment:
+      - DATABASE_URL=postgresql://postgres:6eEZzlFtdjI85h1uaBMBu5BXXkgUMWr8umEvpz0FAhYjOlnrnkZuz33tW6Eoftok@93.177.102.172:5432/postgres
+      - PYTHONUNBUFFERED=1
+    command: python card_listener.py
+    volumes:
+      - .:/app
+    depends_on:
+      - app
 
 
 
